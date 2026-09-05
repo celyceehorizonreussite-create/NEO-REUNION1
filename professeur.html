@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Espace Professeur — ENT</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="topbar">
+    <div class="brand">ENT<span>·</span>Réunion</div>
+    <div class="who">
+      <span id="who-name"></span>
+      <span class="role-tag">Professeur</span>
+      <button class="btn ghost" onclick="logout()">Se déconnecter</button>
+    </div>
+  </div>
+
+  <main class="content">
+    <div class="page-head">
+      <h1 id="greeting">Espace Professeur</h1>
+      <p>Retrouvez vos classes, votre emploi du temps et vos messages.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h3>Mes classes</h3>
+        <table>
+          <thead><tr><th>Classe</th><th>Élèves</th><th>Prochain cours</th></tr></thead>
+          <tbody>
+            <tr><td>6ᵉ A</td><td>24</td><td>Lundi 8h</td></tr>
+            <tr><td>5ᵉ C</td><td>27</td><td>Lundi 10h</td></tr>
+            <tr><td>4ᵉ B</td><td>22</td><td>Mardi 9h</td></tr>
+          </tbody>
+        </table>
+        <p class="small-note">Contenu d'exemple — à remplacer par vos vraies classes.</p>
+      </div>
+
+      <div class="panel">
+        <h3>Cahier de textes</h3>
+        <table>
+          <thead><tr><th>Classe</th><th>Devoir</th><th>À rendre</th></tr></thead>
+          <tbody>
+            <tr><td>6ᵉ A</td><td>Exercices p.42</td><td>Vendredi</td></tr>
+            <tr><td>5ᵉ C</td><td>Rédaction</td><td>Lundi</td></tr>
+          </tbody>
+        </table>
+        <p class="small-note">Contenu d'exemple — à remplacer par vos vrais devoirs.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">Démonstration locale — les comptes sont stockés dans ce navigateur uniquement.</footer>
+</div>
+
+<script src="app.js"></script>
+<script>
+  const session = requireRole("professeur");
+  if (session) {
+    document.getElementById("who-name").textContent = session.name;
+    document.getElementById("greeting").textContent = "Bonjour, " + session.name;
+  }
+</script>
+</body>
+</html>

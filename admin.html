@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Espace Administrateur — ENT</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="topbar">
+    <div class="brand">ENT<span>·</span>Réunion</div>
+    <div class="who">
+      <span id="who-name"></span>
+      <span class="role-tag">Administrateur</span>
+      <button class="btn ghost" onclick="logout()">Se déconnecter</button>
+    </div>
+  </div>
+
+  <main class="content">
+    <div class="page-head">
+      <h1>Espace Administrateur</h1>
+      <p>Créez les comptes des professeurs et des élèves, et gérez les accès existants.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h3>Créer un compte</h3>
+        <div class="notice" id="notice"></div>
+        <form id="create-form">
+          <label for="name">Nom complet</label>
+          <input type="text" id="name" required />
+
+          <div class="form-row">
+            <div>
+              <label for="new-id">Identifiant</label>
+              <input type="text" id="new-id" required />
+            </div>
+            <div>
+              <label for="new-password">Mot de passe</label>
+              <input type="text" id="new-password" required />
+            </div>
+          </div>
+
+          <label for="role">Espace</label>
+          <select id="role">
+            <option value="professeur">Professeur</option>
+            <option value="eleve">Élève</option>
+          </select>
+
+          <button type="submit" class="btn accent full">Créer le compte</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3>Comptes existants</h3>
+        <table>
+          <thead>
+            <tr><th>Nom</th><th>Identifiant</th><th>Espace</th><th></th></tr>
+          </thead>
+          <tbody id="user-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">Démonstration locale — les comptes sont stockés dans ce navigateur uniquement.</footer>
+</div>
+
+<script src="app.js"></script>
+<script>
+  const session = requireRole("admin");
+  if (session) document.getElementById("who-name").textContent = session.name;
+
+  const form = document.getElementById("create-form");
+  const notice = document.getElementById("notice");
+
+  function showNotice(text, ok) {
+    notice.textContent = text;
+    notice.className = "notice show " + (ok ? "ok" : "bad");
+  }
+
+  function renderUsers() {
+    const rows = document.getElementById("user-rows");
+    const users = getUsers().filter((u) => u.role !== "admin");
+    if (users.length === 0) {
+      rows.innerHTML = '<tr class="empty-row"><td colspan="4">Aucun compte professeur ou élève pour le moment.</td></tr>';
+      return;
+    }
+    rows.innerHTML = users
+      .map(
+        (u) => `
+      <tr>
+        <td>${u.name}</td>
+        <td>${u.id}</td>
+        <td><span class="pill ${u.role === "professeur" ? "prof" : "eleve"}">${roleLabel(u.role)}</span></td>
+        <td class="action-row"><button class="btn ghost" data-id="${u.id}">Supprimer</button></td>
+      </tr>`
+      )
+      .join("");
+
+    rows.querySelectorAll("button[data-id]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        deleteUser(btn.getAttribute("data-id"));
+        renderUsers();
+      });
+    });
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("name").value.trim();
+    const id = document.getElementById("new-id").value.trim();
+    const password = document.getElementById("new-password").value;
+    const role = document.getElementById("role").value;
+
+    const result = createUser({ id, password, role, name });
+    if (!result.ok) {
+      showNotice(result.error, false);
+      return;
+    }
+    showNotice(`Compte ${roleLabel(role).toLowerCase()} créé pour ${name}.`, true);
+    form.reset();
+    renderUsers();
+  });
+
+  renderUsers();
+</script>
+</body>
+</html>
